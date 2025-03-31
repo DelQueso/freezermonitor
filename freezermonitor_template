@@ -102,14 +102,35 @@ input_text:
   freezermonitor_template_group:
   freezermonitor_template_location:
 
+
 automation:
-  - alias: freezermonitor_template Udpate Check
-    id: freezermonitor_template_udpate_check
-    trigger:
-      - platform: time_pattern
-        seconds: "/1"
-    action:
-      - service: homeassistant.update_entity
-        target:
-          entity_id: sensor.freezermonitor_template_last_update
-    mode: single
+  - alias: freezermonitor_template Update And Alarm Check
+    id: freezermonitor_template_update_and_alarm_check
+    triggers:
+      - seconds: /1
+        trigger: time_pattern
+        id: time_pattern
+      - entity_id: sensor.template_freezermonitor_template_alarm
+        trigger: state
+        id: state_change
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: time_pattern
+            sequence:
+              - target:
+                  entity_id: sensor.freezermonitor_template_last_update
+                action: homeassistant.update_entity
+                data: {}
+          - conditions:
+              - condition: trigger
+                id: state_change
+              - condition: template
+                value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+            sequence:
+              - data:
+                  entity_id: "{{ trigger.entity_id }}"
+                action: script.alarm_notifications
+    mode: queued
