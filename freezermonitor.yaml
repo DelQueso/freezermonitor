@@ -1,0 +1,253 @@
+substitutions:
+  name: "freezermonitor"
+  friendly_name: "Freezer Monitor"
+  update_interval: 60s
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+
+  project:
+    name: "delqueso.freezermonitor"
+
+# Example configuration entry
+http_request:
+  verify_ssl: true
+  buffer_size_rx: 2048
+  buffer_size_tx: 2048
+update:
+  - platform: http_request
+    name: Firmware Update
+    source: https://github.com/delqueso/freezermonitor/releases/latest/download/freezermonitor.manifest.json
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+api:
+
+ota:
+- platform: http_request
+
+wifi:
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    password: '12345678'
+captive_portal:
+logger:
+  level: NONE
+
+
+number:
+  - platform: template
+    name: "Door Open Alarm Siren Delay"
+    id: door_open_alarm_siren_delay
+    min_value: 10
+    max_value: 300
+    step: 1
+    initial_value: 120  # Default value
+    unit_of_measurement: "s"
+    optimistic: true  # Enables optimistic mode
+  - platform: template
+    name: "Door Open Warning Siren Delay"
+    id: door_open_warning_siren_delay
+    min_value: 10
+    max_value: 300
+    step: 1
+    initial_value: 30  # Default value
+    unit_of_measurement: "s"
+    optimistic: true  # Enables optimistic mode
+# variables
+globals:
+  - id: door_open_counter
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+#connection status, door open, alarm handling
+interval:
+  - interval: 1s
+    then:
+      if:
+        condition:
+          wifi.connected:
+        then:
+          - if:
+              condition:
+                api.connected:
+              then:
+                - light.turn_on:
+                    id: status_led_ok
+                    flash_length: 100ms
+                - light.turn_off:
+                    id: status_led_nok
+              else:
+                - light.turn_on:
+                    id: status_led_nok
+                    flash_length: 100ms
+                - light.turn_off:
+                    id: status_led_ok
+        else:
+          - light.turn_on:
+              id: status_led_nok
+              flash_length: 500ms
+          - light.turn_off:
+              id: status_led_ok
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            binary_sensor.is_on: door_switch  # Check if the door is still open
+          then:
+            - lambda: |-
+                id(door_open_counter) += 1;
+
+            - if:
+                condition:
+                  lambda: "return id(door_open_counter) >= (int) id(door_open_alarm_siren_delay).state;"
+                then:
+                  - output.turn_on: piezo_speaker  # Turn on piezo continuously for alarm
+                  - delay: 800ms                  # Beep duration
+                  - output.turn_off: piezo_speaker # Turn off piezo after beep
+
+            - if:  # Separate 'if' block for beep logic
+                condition:
+                  lambda: "return (id(door_open_counter) < (int) id(door_open_alarm_siren_delay).state && id(door_open_counter) >= (int) id(door_open_warning_siren_delay).state && id(door_open_counter) % 4 == 0);"
+                then:
+                  - output.turn_on: piezo_speaker  # Turn on piezo for the beep
+                  - delay: 200ms                  # Beep duration
+                  - output.turn_off: piezo_speaker # Turn off piezo after beep
+
+          else:  # Door is closed
+            - lambda: |-
+                id(door_open_counter) = 0; 
+            - output.turn_off: piezo_speaker  # Ensure piezo is off
+binary_sensor:
+- platform: gpio
+  pin:
+    number: GPIO33
+    mode:
+      input: true
+      pullup: true
+  name: "Door"
+  device_class: door
+  id: door_switch
+
+- platform: status
+  name: "Status"
+
+#spi for temperature chip
+spi:
+  id: spicomp
+  miso_pin: GPIO26
+  mosi_pin: GPIO13
+  clk_pin: GPIO14
+
+#temperature and current sensor
+sensor:
+  - platform: max31865
+    name: "Temperature"
+    spi_id: spicomp
+    cs_pin: GPIO27
+    reference_resistance: 392 Ω
+    rtd_nominal_resistance: 100 Ω
+    update_interval: ${update_interval}
+    force_update: True    
+    rtd_wires: 3
+    mains_filter: 50 Hz
+
+  - platform: ct_clamp
+    sensor: adc_sensor
+    name: "Current"
+    update_interval: ${update_interval}
+    #force_update: True   
+    id: measured_current 
+    filters: 
+      # - multiply: 21.74
+      - lambda: if(0.5 >= x*21.74) return 0; return x*21.74;
+      
+    
+
+    # Current measurement sensor
+  - platform: adc
+    pin: GPIO35
+    id: adc_sensor
+    attenuation: 12db
+
+  - platform: template
+    id: my_power
+    name: "Power"
+    lambda: return id(measured_current).state * 230.0 / 1000; #Power = Current * Voltage (so change 230 to whatever your mains voltage is)
+    unit_of_measurement: 'kW'
+    update_interval: ${update_interval}
+    force_update: True  
+
+  - platform: total_daily_energy
+    name: "Total Daily Energy"
+    power_id: my_power
+  - platform: template
+    id: door_open_time
+    name: "Door open time"
+    lambda: return id(door_open_counter);
+    unit_of_measurement: "s"
+    update_interval: 1s
+
+    
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+    entity_category: "diagnostic"
+    device_class: ""
+
+# Define GPIO outputs
+output:
+  - platform: gpio
+    pin: GPIO32
+    id: red_led_bottom
+
+  - platform: gpio
+    pin: GPIO21
+    id: green_led_top
+
+  - platform: gpio
+    pin: GPIO19
+    id: red_led_top
+
+  - platform: gpio
+    pin: GPIO04
+    id: piezo_speaker
+
+# Define leds
+light:
+  - platform: binary
+    internal: true  
+    id: red_led_error
+    output: red_led_bottom
+    name: "Red LED Bottom"
+
+  - platform: binary
+    internal: true  
+    id: status_led_nok
+    output: red_led_top
+    name: "Red LED Top"
+    
+  - platform: binary
+    internal: true  
+    id: status_led_ok
+    output: green_led_top
+
+# Time for energy consumption
+time:
+  - platform: sntp
+    id: my_time
+
