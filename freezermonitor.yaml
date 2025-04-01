@@ -49,6 +49,7 @@ number:
     initial_value: 120  # Default value
     unit_of_measurement: "s"
     optimistic: true  # Enables optimistic mode
+    restore_value: yes
   - platform: template
     name: "Door Open Warning Siren Delay"
     id: door_open_warning_siren_delay
@@ -58,6 +59,7 @@ number:
     initial_value: 30  # Default value
     unit_of_measurement: "s"
     optimistic: true  # Enables optimistic mode
+    restore_value: yes
 # variables
 globals:
   - id: door_open_counter
