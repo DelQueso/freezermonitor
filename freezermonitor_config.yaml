@@ -83,7 +83,7 @@ command_line:
 - sensor:
       name: "freezermonitor_template_latest_config_version"
       command: >
-        wget -qO- https://raw.githubusercontent.com/DelQueso/freezer/refs/heads/main/freezer_config.yaml |
+        wget -qO- https://raw.githubusercontent.com/DelQueso/freezermonitor/refs/heads/main/freezermonitor_config.yaml |
         grep 'state:' | head -n 1 | cut -d':' -f2 | xargs
       scan_interval: 3600
       value_template: "{{ value }}"
