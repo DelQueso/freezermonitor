@@ -1,12 +1,12 @@
 template:
   - sensor:
-    - name: freezer_template_installed_config_version
-      state: 1.0.0
+    - name: freezermonitor_template_installed_config_version
+      state: 1.0.1
   - binary_sensor:
-    - name: freezer_template_config_version_uptodate
+    - name: freezermonitor_template_config_version_uptodate
       state: >
-        {% set latest = states('sensor.freezer_template_latest_config_version') %}
-        {% set installed = states('sensor.freezer_template_installed_config_version') %}
+        {% set latest = states('sensor.freezermonitor_template_latest_config_version') %}
+        {% set installed = states('sensor.freezermonitor_template_installed_config_version') %}
         {{ latest != 'unknown' and installed != 'unknown' and latest == installed }}
       device_class: update      
   # Check if temperature is within range. When temperature is unavailable, this value is set to false. The sensor becomes true after some delay.
@@ -81,14 +81,14 @@ template:
           
 command_line:
 - sensor:
-      name: "freezer_template_latest_config_version"
+      name: "freezermonitor_template_latest_config_version"
       command: >
         wget -qO- https://raw.githubusercontent.com/DelQueso/freezer/refs/heads/main/freezer_config.yaml |
         grep 'state:' | head -n 1 | cut -d':' -f2 | xargs
       scan_interval: 3600
       value_template: "{{ value }}"
 input_boolean:
-  freezer_template_report_temperature:
+  freezermonitor_template_report_temperature:
     name: "Report Temperature"
     icon: mdi:checkbox-marked  
     initial: true
