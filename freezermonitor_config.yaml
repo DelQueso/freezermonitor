@@ -1,4 +1,14 @@
 template:
+  - sensor:
+    - name: freezer_template_installed_config_version
+      state: 1.0.0
+  - binary_sensor:
+    - name: freezer_template_config_version_uptodate
+      state: >
+        {% set latest = states('sensor.freezer_template_latest_config_version') %}
+        {% set installed = states('sensor.freezer_template_installed_config_version') %}
+        {{ latest != 'unknown' and installed != 'unknown' and latest == installed }}
+      device_class: update      
   # Check if temperature is within range. When temperature is unavailable, this value is set to false. The sensor becomes true after some delay.
   - binary_sensor:
     - name: freezermonitor_template_temperature_outside_threshold_flag
@@ -68,6 +78,21 @@ template:
           door_open_warning_siren_delay: "{{ states('number.freezermonitor_template_door_open_warning_siren_delay') }}"
           door_open_alarm_siren_delay: "{{ states('number.freezermonitor_template_door_open_alarm_siren_delay') }}"
           door_open_alarm_notification_delay: "{{ states('input_number.freezermonitor_template_door_open_alarm_notification_delay') }}"
+          
+command_line:
+- sensor:
+      name: "freezer_template_latest_config_version"
+      command: >
+        wget -qO- https://raw.githubusercontent.com/DelQueso/freezer/refs/heads/main/freezer_config.yaml |
+        grep 'state:' | head -n 1 | cut -d':' -f2 | xargs
+      scan_interval: 3600
+      value_template: "{{ value }}"
+input_boolean:
+  freezer_template_report_temperature:
+    name: "Report Temperature"
+    icon: mdi:checkbox-marked  
+    initial: true
+    
 input_number:
   freezermonitor_template_low_temperature_threshold:
     name: Low Temperature Threshold
