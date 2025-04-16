@@ -1,7 +1,7 @@
 template:
   - sensor:
     - name: freezermonitor_template_installed_config_version
-      state: 1.0.1
+      state: 1.0.2
   - binary_sensor:
     - name: freezermonitor_template_config_version_uptodate
       state: >
@@ -157,5 +157,5 @@ automation:
             sequence:
               - data:
                   entity_id: "{{ trigger.entity_id }}"
-                action: script.alarm_notifications
+                action: script.alarm_collect
     mode: queued
