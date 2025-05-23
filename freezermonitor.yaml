@@ -68,14 +68,12 @@ sensor:
     #force_update: True   
     id: measured_current 
     accuracy_decimals: 2
-    filters:
-      - calibrate_linear:
-          - 1.65 -> 0
-          - 1.19 -> 10.0
+
     # Current measurement sensor
   - platform: adc
     pin: GPIO35
     id: adc_sensor
+    accuracy_decimals: 3
     name: "Raw ADC Voltage"
     attenuation: 12db
     update_interval: 1s
