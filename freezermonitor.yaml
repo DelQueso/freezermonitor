@@ -63,9 +63,7 @@ sensor:
   - platform: ct_clamp
     sensor: adc_sensor
     name: "Current"
-    # update_interval: ${update_interval}
-    update_interval: 1s
-    #force_update: True   
+    update_interval: ${update_interval} 
     id: measured_current 
     accuracy_decimals: 2
     filters:
@@ -78,9 +76,7 @@ sensor:
     pin: GPIO35
     id: adc_sensor
     accuracy_decimals: 3
-    name: "Raw ADC Voltage"
     attenuation: 12db
-    update_interval: 1s
 
   - platform: template
     id: my_power
