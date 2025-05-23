@@ -69,7 +69,8 @@ sensor:
     id: measured_current 
     accuracy_decimals: 2
     filters:
-      - lambda: return (x - 1.65) / 0.046;
+      - lambda: return x;
+      #- lambda: return (x - 1.65) / 0.046;
     # Current measurement sensor
   - platform: adc
     pin: GPIO35
