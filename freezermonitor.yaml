@@ -73,6 +73,7 @@ sensor:
   - platform: adc
     pin: GPIO35
     id: adc_sensor
+    name: "Raw ADC Voltage"
     attenuation: 12db
 
   - platform: template
