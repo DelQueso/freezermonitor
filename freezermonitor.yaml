@@ -66,10 +66,12 @@ sensor:
     update_interval: ${update_interval}
     #force_update: True   
     id: measured_current 
-    filters: 
-      # - multiply: 21.74
-      # - lambda: if(0.5 >= x*21.74) return 0; return x*21.74;
-      - lambda: return x*21.74;
+    accuracy_decimals: 2
+    lambda: |-
+      float voltage = id(adc_sensor);
+      float vref = 1.65;  // Reference voltage at 0A
+      float sensitivity = 0.046;  // 46 mV/A
+      return (voltage - vref) / sensitivity;
 
     # Current measurement sensor
   - platform: adc
