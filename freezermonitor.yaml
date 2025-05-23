@@ -68,6 +68,10 @@ sensor:
     #force_update: True   
     id: measured_current 
     accuracy_decimals: 2
+    filters:
+      - calibrate_linear:
+        - 0 -> 0
+        - 0.46 -> 10.0
 
     # Current measurement sensor
   - platform: adc
