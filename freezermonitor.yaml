@@ -68,7 +68,8 @@ sensor:
     id: measured_current 
     filters: 
       # - multiply: 21.74
-      - lambda: if(0.5 >= x*21.74) return 0; return x*21.74;
+      # - lambda: if(0.5 >= x*21.74) return 0; return x*21.74;
+      - lambda: return x*21.74;
 
     # Current measurement sensor
   - platform: adc
