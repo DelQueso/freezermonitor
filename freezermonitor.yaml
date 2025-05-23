@@ -55,22 +55,28 @@ sensor:
     cs_pin: GPIO27
     reference_resistance: 392 Ω
     rtd_nominal_resistance: 100 Ω
-    update_interval: ${update_interval}
+    update_interval: 1s
     force_update: True    
     rtd_wires: 3
     mains_filter: 50 Hz
+    filters:
+      - or:
+        - heartbeat: ${update_interval}       # Send once per minute normally
+        - delta: 1          # Send immediately if big change
 
   - platform: ct_clamp
     sensor: adc_sensor
     name: "Current"
-    update_interval: ${update_interval} 
+    update_interval: 1s
     id: measured_current 
     accuracy_decimals: 2
     filters:
       - calibrate_linear:
         - 0 -> 0
         - 0.46 -> 10.0
-
+      - or:
+        - heartbeat: ${update_interval} # Send once per minute normally
+        - delta: 0.5          # Send immediately if big change
     # Current measurement sensor
   - platform: adc
     pin: GPIO35
@@ -83,9 +89,13 @@ sensor:
     name: "Power"
     lambda: return id(measured_current).state * 230.0 / 1000; #Power = Current * Voltage (so change 230 to whatever your mains voltage is)
     unit_of_measurement: 'kW'
-    update_interval: ${update_interval}
+    update_interval: 1s
     force_update: True  
-
+    filters:
+      - or:
+        - heartbeat: ${update_interval}       # Send once per minute normally
+        - delta: 0.1            # Send immediately if big change
+        
   - platform: total_daily_energy
     name: "Total Daily Energy"
     power_id: my_power
