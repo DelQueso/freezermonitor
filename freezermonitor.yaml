@@ -70,8 +70,8 @@ sensor:
     filters:
       - lambda: |-
         float voltage = id(adc_sensor).state;
-        float vref = 1.65;  // Reference voltage at 0A
-        float sensitivity = 0.046;  // 46 mV/A
+        float vref = 1.65;  
+        float sensitivity = 0.046;  
         return (voltage - vref) / sensitivity;
 
     # Current measurement sensor
