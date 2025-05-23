@@ -68,12 +68,7 @@ sensor:
     id: measured_current 
     accuracy_decimals: 2
     filters:
-      - lambda: |-
-        float voltage = id(adc_sensor).state;
-        float vref = 1.65;  
-        float sensitivity = 0.046;  
-        return (voltage - vref) / sensitivity;
-
+      - lambda: return (x - 1.65) / 0.046;
     # Current measurement sensor
   - platform: adc
     pin: GPIO35
