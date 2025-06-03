@@ -1,4 +1,4 @@
-  substitutions:
+substitutions:
   name: "freezermonitor"
   friendly_name: "Freezer Monitor"
   update_interval: 60s
