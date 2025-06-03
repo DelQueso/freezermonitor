@@ -1,4 +1,4 @@
-substitutions:
+  substitutions:
   name: "freezermonitor"
   friendly_name: "Freezer Monitor"
   update_interval: 60s
@@ -60,9 +60,15 @@ sensor:
     rtd_wires: 3
     mains_filter: 50 Hz
     filters:
+      - lambda: |-
+          if (isnan(x)) {
+            return {};  // Prevent sending unknown
+          } else {
+            return x;
+          }
       - or:
-        - heartbeat: ${update_interval}       # Send once per minute normally
-        - delta: 1          # Send immediately if big change
+          - heartbeat: ${update_interval}
+          - delta: 1
 
   - platform: ct_clamp
     sensor: adc_sensor
