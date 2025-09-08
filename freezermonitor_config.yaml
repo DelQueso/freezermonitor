@@ -29,19 +29,6 @@ template:
             True
           {% endif %}
         {% endif %}
-    - name: freezermonitor_template_iscooling
-      state: >
-        {% set power = states('sensor.freezermonitor_template_power') %}
-        {% if power in ['unavailable', 'unknown', 'none'] %}
-          False
-        {% else %}
-          {% set power = power | float %}
-          {% if power > 0.010 %}
-            True
-          {% else %}
-            False
-          {% endif %}  
-        {% endif %}    
           
   - sensor:
       - name: freezermonitor_template_last_update
@@ -69,7 +56,7 @@ template:
             {% endif %}
           {% endif %}
         attributes:
-          friendly_name: "{{ states('input_text.freezermonitor_template_name') }}"
+          display_name: "{{ states('input_text.freezermonitor_template_name') }}"
           group:  "{{ states('input_text.freezermonitor_template_group') }}"
           location: "{{ states('input_text.freezermonitor_template_location') }}"
           low_temperature_threshold: "{{ states('input_number.freezermonitor_template_low_temperature_threshold') }}"
