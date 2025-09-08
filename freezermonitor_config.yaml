@@ -1,7 +1,7 @@
 template:
   - sensor:
     - name: freezermonitor_template_installed_config_version
-      state: 1.0.2
+      state: 1.0.3
   - binary_sensor:
     - name: freezermonitor_template_config_version_uptodate
       state: >
