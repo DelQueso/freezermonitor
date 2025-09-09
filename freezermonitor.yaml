@@ -226,7 +226,7 @@ output:
   
   - platform: gpio
     pin: GPIO32
-    id: red_blue_bottom
+    id: blue_led_bottom
 
   - platform: gpio
     pin: GPIO21
