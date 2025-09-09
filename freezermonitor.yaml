@@ -247,7 +247,10 @@ light:
     id: red_led_error
     output: red_led_bottom
     name: "Red LED Bottom"
+    
   - platform: binary
+    internal: true  
+    id: blue_led_bottom_reserve
     output: blue_led_bottom
     name: Blue LED Bottom
   
