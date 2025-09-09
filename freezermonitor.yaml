@@ -13,10 +13,10 @@ http_request:
   verify_ssl: true
   buffer_size_rx: 2048
   buffer_size_tx: 2048
-update:
-  - platform: http_request
-    name: Firmware Update
-    source: https://github.com/${manufacturer}/${name}/releases/latest/download/${name}.manifest.json
+#update:    remove update so old devices can not update anymore
+#  - platform: http_request
+#    name: Firmware Update
+#    source: https://github.com/${manufacturer}/${name}/releases/latest/download/${name}.manifest.json
 esp32:
   board: esp32dev
   framework:
