@@ -13,10 +13,10 @@ http_request:
   verify_ssl: true
   buffer_size_rx: 2048
   buffer_size_tx: 2048
-#update:    remove update so old devices can not update anymore
-#  - platform: http_request
-#    name: Firmware Update
-#    source: https://github.com/${manufacturer}/${name}/releases/latest/download/${name}.manifest.json
+update:    
+  - platform: http_request
+    name: Firmware Update
+    source: https://github.com/${manufacturer}/${name}/releases/latest/download/${name}.manifest.json
 esp32:
   board: esp32dev
   framework:
@@ -57,7 +57,7 @@ sensor:
     rtd_nominal_resistance: 100 Ω
     update_interval: 1s
     force_update: True    
-    rtd_wires: 3
+    rtd_wires: 4
     mains_filter: 50 Hz
     filters:
       - lambda: |-
@@ -201,10 +201,9 @@ interval:
 binary_sensor:
 - platform: gpio
   pin:
-    number: GPIO33
+    number: GPIO34
     mode:
       input: true
-      pullup: true
   name: "Door"
   device_class: door
   id: door_switch
@@ -222,8 +221,12 @@ spi:
 # Define GPIO outputs
 output:
   - platform: gpio
-    pin: GPIO32
+    pin: GPIO33
     id: red_led_bottom
+  
+  - platform: gpio
+    pin: GPIO32
+    id: red_blue_bottom
 
   - platform: gpio
     pin: GPIO21
@@ -244,7 +247,10 @@ light:
     id: red_led_error
     output: red_led_bottom
     name: "Red LED Bottom"
-
+  - platform: binary
+    output: blue_led_bottom
+    name: Blue LED Bottom
+  
   - platform: binary
     internal: true  
     id: status_led_nok
