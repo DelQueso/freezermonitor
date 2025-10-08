@@ -1,7 +1,7 @@
 template:
   - sensor:
     - name: freezermonitor_template_installed_config_version
-      state: 1.0.2
+      state: 1.0.8
   - binary_sensor:
     - name: freezermonitor_template_config_version_uptodate
       state: >
@@ -29,25 +29,13 @@ template:
             True
           {% endif %}
         {% endif %}
-    - name: freezermonitor_template_iscooling
-      state: >
-        {% set power = states('sensor.freezermonitor_template_power') %}
-        {% if power in ['unavailable', 'unknown', 'none'] %}
-          False
-        {% else %}
-          {% set power = power | float %}
-          {% if power > 0.010 %}
-            True
-          {% else %}
-            False
-          {% endif %}  
-        {% endif %}    
           
   - sensor:
       - name: freezermonitor_template_last_update
         unit_of_measurement: "s"
         state: "{{ (as_timestamp(now()) - as_timestamp(states.sensor.freezermonitor_template_temperature.last_updated)) | float(0) | round(0) }}"
-      - unique_id: freezermonitor_template_alarm
+      - name: freezermonitor_template_alarm
+        unique_id: freezermonitor_template_alarm
         state: >
           {% set current_temp = states('sensor.freezermonitor_template_temperature') %}
           {% set last_update = states('sensor.freezermonitor_template_last_update') | float %}
@@ -69,7 +57,7 @@ template:
             {% endif %}
           {% endif %}
         attributes:
-          friendly_name: "{{ states('input_text.freezermonitor_template_name') }}"
+          display_name: "{{ states('input_text.freezermonitor_template_name') }}"
           group:  "{{ states('input_text.freezermonitor_template_group') }}"
           location: "{{ states('input_text.freezermonitor_template_location') }}"
           low_temperature_threshold: "{{ states('input_number.freezermonitor_template_low_temperature_threshold') }}"
@@ -135,7 +123,7 @@ automation:
       - seconds: /1
         trigger: time_pattern
         id: time_pattern
-      - entity_id: sensor.template_freezermonitor_template_alarm
+      - entity_id: sensor.freezermonitor_template_alarm
         trigger: state
         id: state_change
     conditions: []

@@ -9,11 +9,12 @@ esphome:
   name_add_mac_suffix: true
   project:
     name: "${manufacturer}.${name}"
+    version: "1.0.0"   # <-- REQUIRED
 http_request:
   verify_ssl: true
   buffer_size_rx: 2048
   buffer_size_tx: 2048
-update:
+update:    
   - platform: http_request
     name: Firmware Update
     source: https://github.com/${manufacturer}/${name}/releases/latest/download/${name}.manifest.json
@@ -57,7 +58,7 @@ sensor:
     rtd_nominal_resistance: 100 Ω
     update_interval: 1s
     force_update: True    
-    rtd_wires: 3
+    rtd_wires: 4
     mains_filter: 50 Hz
     filters:
       - lambda: |-
@@ -70,41 +71,6 @@ sensor:
           - heartbeat: ${update_interval}
           - delta: 1
 
-  - platform: ct_clamp
-    sensor: adc_sensor
-    name: "Current"
-    update_interval: 1s
-    id: measured_current 
-    accuracy_decimals: 2
-    filters:
-      - calibrate_linear:
-        - 0 -> 0
-        - 0.46 -> 10.0
-      - or:
-        - heartbeat: ${update_interval} # Send once per minute normally
-        - delta: 0.5          # Send immediately if big change
-    # Current measurement sensor
-  - platform: adc
-    pin: GPIO35
-    id: adc_sensor
-    accuracy_decimals: 3
-    attenuation: 12db
-
-  - platform: template
-    id: my_power
-    name: "Power"
-    lambda: return id(measured_current).state * 230.0 / 1000; #Power = Current * Voltage (so change 230 to whatever your mains voltage is)
-    unit_of_measurement: 'kW'
-    update_interval: 1s
-    force_update: True  
-    filters:
-      - or:
-        - heartbeat: ${update_interval}       # Send once per minute normally
-        - delta: 0.1            # Send immediately if big change
-        
-  - platform: total_daily_energy
-    name: "Total Daily Energy"
-    power_id: my_power
   - platform: template
     id: door_open_time
     name: "Door open time"
@@ -201,10 +167,9 @@ interval:
 binary_sensor:
 - platform: gpio
   pin:
-    number: GPIO33
+    number: GPIO34
     mode:
       input: true
-      pullup: true
   name: "Door"
   device_class: door
   id: door_switch
@@ -222,8 +187,12 @@ spi:
 # Define GPIO outputs
 output:
   - platform: gpio
-    pin: GPIO32
+    pin: GPIO33
     id: red_led_bottom
+  
+  - platform: gpio
+    pin: GPIO32
+    id: blue_led_bottom
 
   - platform: gpio
     pin: GPIO21
@@ -244,7 +213,13 @@ light:
     id: red_led_error
     output: red_led_bottom
     name: "Red LED Bottom"
-
+    
+  - platform: binary
+    internal: true  
+    id: blue_led_bottom_reserve
+    output: blue_led_bottom
+    name: Blue LED Bottom
+  
   - platform: binary
     internal: true  
     id: status_led_nok
