@@ -7,9 +7,9 @@ esphome:
   name: "${name}"
   friendly_name: "${friendly_name}"
   name_add_mac_suffix: true
-  version: "1.0.0"   # <-- REQUIRED
   project:
     name: "${manufacturer}.${name}"
+    version: "1.0.0"   # <-- REQUIRED
 http_request:
   verify_ssl: true
   buffer_size_rx: 2048
