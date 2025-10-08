@@ -32,6 +32,11 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v5
+      # Fix Python dependencies for ESP-IDF 5.x
+      - name: Fix ESP-IDF Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "pydantic<2.3" "pydantic-settings<2.0" "idf-component-manager<2.0.0"
       - name: ESPHome ${{ matrix.esphome-version }}
         uses: esphome/build-action@v7.1.0
         with:
