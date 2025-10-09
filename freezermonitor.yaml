@@ -9,7 +9,6 @@ esphome:
   name_add_mac_suffix: true
   project:
     name: "${manufacturer}.${name}"
-    version: "1.0.0"   # <-- REQUIRED
 http_request:
   verify_ssl: true
   buffer_size_rx: 2048
@@ -230,9 +229,3 @@ light:
     internal: true  
     id: status_led_ok
     output: green_led_top
-
-# Time for energy consumption
-time:
-  - platform: sntp
-    id: my_time
-
