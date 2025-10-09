@@ -32,6 +32,12 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v5
+      # NEW: Ensure latest idf-component-manager is installed
+      - name: Update idf-component-manager
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade idf-component-manager==2.4.1
+          python3 -m idf_component_manager --version
       - name: ESPHome ${{ matrix.esphome-version }}
         uses: esphome/build-action@v7
         with:
